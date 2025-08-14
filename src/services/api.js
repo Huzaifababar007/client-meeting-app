@@ -1,0 +1,118 @@
+import axios from "axios";
+
+const API_BASE = "http://localhost:5000/api";
+
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 5000,
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Error:", error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
+export const getClientById = async (id) => {
+  try {
+    const response = await api.get(`/clients/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateClientById = async (id, data) => {
+  try {
+    const response = await api.put(`/clients/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllClients = async () => {
+  try {
+    const response = await api.get(`/clients`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createClient = async (data) => {
+  try {
+    const response = await api.post(`/clients`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteClientById = async (id) => {
+  try {
+    const response = await api.delete(`/clients/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getMeetings = async () => {
+  try {
+    const response = await api.get(`/meetings`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllMeetings = async () => {
+  try {
+    const response = await api.get(`/meetings`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getMeetingById = async (id) => {
+  try {
+    const response = await api.get(`/meetings/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createMeeting = async (data) => {
+  try {
+    const response = await api.post(`/meetings`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateMeetingById = async (id, data) => {
+  try {
+    const response = await api.put(`/meetings/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteMeetingById = async (id) => {
+  try {
+    const response = await api.delete(`/meetings/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
