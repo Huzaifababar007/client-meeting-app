@@ -24,10 +24,10 @@ export default function Dashboard() {
   const [profileData, setProfileData] = useState(() => {
     const saved = localStorage.getItem('profileData');
     return saved ? JSON.parse(saved) : {
-      fullName: user?.fullName || "Huzaifa Babar",
-      email: user?.email || "huzaifa@example.com",
+      fullName: user?.fullName || "",
+      email: user?.email || "",
       phone: user?.phone || "",
-      profilePicture: user?.profilePicture || "https://via.placeholder.com/80"
+      profilePicture: user?.profilePicture || ""
     };
   });
   
@@ -50,6 +50,19 @@ export default function Dashboard() {
   });
   
   const [settingsMessage, setSettingsMessage] = useState("");
+
+  // Update profile data when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData(prev => ({
+        ...prev,
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        profilePicture: user.profilePicture || ""
+      }));
+    }
+  }, [user]);
 
   // Fetch initial data on component mount
   useEffect(() => {
@@ -189,7 +202,7 @@ export default function Dashboard() {
         <div className="flex flex-col items-center mt-4">
            <div className="relative">
           <img
-               src={profileData.profilePicture}
+               src={profileData.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=random&color=fff&size=80`}
             alt="User"
                className="w-20 h-20 rounded-full border-2 border-white mb-3 object-cover"
              />

@@ -50,6 +50,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
+    // Clear any cached profile data when logging in
+    localStorage.removeItem('profileData');
   };
 
   const logout = () => {
