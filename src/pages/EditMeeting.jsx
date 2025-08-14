@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { getMeetingById, updateMeetingById } from '../services/api';
+import { getMeetingById, updateMeetingById, getAllClients } from '../services/api';
 
 export default function EditMeeting() {
   const { id } = useParams();
@@ -21,8 +20,8 @@ export default function EditMeeting() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const resClients = await axios.get('http://localhost:5000/api/clients');
-        setClients(resClients.data || []);
+        const clientsData = await getAllClients();
+        setClients(clientsData || []);
         const meeting = await getMeetingById(id);
         setFormData({
           title: meeting.title || '',

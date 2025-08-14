@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createClient } from "../services/api";
 
 export default function AddClient() {
   const [formData, setFormData] = useState({
@@ -22,23 +22,21 @@ export default function AddClient() {
     console.log("Submitting:", formData);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/clients", formData);
-      if (res.status === 201) {
-        setSuccessMessage("Client added successfully ✅");
+      await createClient(formData);
+      setSuccessMessage("Client added successfully ✅");
 
-        // ✅ Use fullName instead of name here
-        setFormData({
-          fullName: "",
-          email: "",
-          phone: "",
-          company: "",
-        });
+      // ✅ Use fullName instead of name here
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        company: "",
+      });
 
-        setTimeout(() => {
-          setSuccessMessage("");
-          navigate("/dashboard");
-        }, 3000);
-      }
+      setTimeout(() => {
+        setSuccessMessage("");
+        navigate("/dashboard");
+      }, 3000);
     } catch (error) {
       console.error("Error adding client:", error);
       setSuccessMessage("❌ Failed to add client.");

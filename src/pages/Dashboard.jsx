@@ -1,9 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { formatDateTime } from "../utils/formatDate";
 import { useAuth } from "../context/AuthContext";
 import { updateUserProfile } from "../services/authService";
+import { getAllClients, getAllMeetings, createClient, deleteClientById, createMeeting, deleteMeetingById } from "../services/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -70,11 +70,11 @@ export default function Dashboard() {
       setLoading(true);
       try {
         const [clientsRes, meetingsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/clients"),
-          axios.get("http://localhost:5000/api/meetings")
+          getAllClients(),
+          getAllMeetings()
         ]);
-        setClients(clientsRes.data || []);
-        setMeetings(meetingsRes.data || []);
+        setClients(clientsRes || []);
+        setMeetings(meetingsRes || []);
         } catch (err) {
         console.error("Error fetching initial data:", err);
         setError("Failed to load data.");
@@ -94,7 +94,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/clients/${id}`);
+      await deleteClientById(id);
       setClients(clients.filter((client) => client._id !== id));
     } catch (err) {
       console.error("Error deleting client:", err);
@@ -539,7 +539,7 @@ export default function Dashboard() {
                         <button
                           onClick={async () => {
                             try {
-                              await axios.delete(`http://localhost:5000/api/meetings/${m._id}`);
+                              await deleteMeetingById(m._id);
                               setMeetings((prev) => prev.filter((x) => x._id !== m._id));
                             } catch (e) {
                               console.error('Delete meeting failed', e);

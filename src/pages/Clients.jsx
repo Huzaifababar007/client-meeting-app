@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { getAllClients, deleteClientById } from "../services/api";
 
 export default function Clients() {
   const [clients, setClients] = useState([]);
@@ -11,8 +11,8 @@ export default function Clients() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/clients");
-        setClients(res.data || []);
+        const clientsData = await getAllClients();
+        setClients(clientsData || []);
       } catch (err) {
         console.error("Error fetching clients:", err);
         setError("Failed to load clients.");
@@ -41,7 +41,7 @@ export default function Clients() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/clients/${id}`);
+      await deleteClientById(id);
       setClients((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
       console.error("Delete failed:", err);

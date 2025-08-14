@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { createMeeting } from '../services/api';
+import { createMeeting, getAllClients } from '../services/api';
 
 export default function AddMeeting() {
   const navigate = useNavigate();
@@ -20,8 +19,8 @@ export default function AddMeeting() {
   useEffect(() => {
     async function fetchClients() {
       try {
-        const res = await axios.get('http://localhost:5000/api/clients');
-        setClients(res.data || []);
+        const clientsData = await getAllClients();
+        setClients(clientsData || []);
       } catch (e) {
         console.error('Failed to load clients', e);
       }
