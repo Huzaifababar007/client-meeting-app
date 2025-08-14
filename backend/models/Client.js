@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   fullName: {
     type: String,
     required: true,
@@ -8,7 +13,6 @@ const clientSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
   },
   phone: {
     type: String,

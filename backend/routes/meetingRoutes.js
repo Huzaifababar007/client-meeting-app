@@ -1,11 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const Meeting = require('../models/Meeting');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Middleware to extract user ID from token
+const authenticateUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
 
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', authenticateUser, async (req, res) => {
   try {
-    const meeting = new Meeting(req.body);
+    const meeting = new Meeting({
+      ...req.body,
+      userId: req.userId
+    });
     const saved = await meeting.save();
     res.status(201).json(saved);
   } catch (error) {
@@ -13,20 +35,26 @@ router.post('/', async (req, res) => {
   }
 });
 
-// READ all
-router.get('/', async (_req, res) => {
+// READ all meetings for current user
+router.get('/', authenticateUser, async (_req, res) => {
   try {
-    const meetings = await Meeting.find().sort({ dateTime: 1 }).populate('clientId');
+    const meetings = await Meeting.find({ userId: req.userId })
+      .sort({ dateTime: 1 })
+      .populate('clientId');
     res.json(meetings);
   } catch (error) {
     res.status(500).json({ error: 'Server Error' });
   }
 });
 
-// READ one
-router.get('/:id', async (req, res) => {
+// READ one meeting
+router.get('/:id', authenticateUser, async (req, res) => {
   try {
-    const meeting = await Meeting.findById(req.params.id).populate('clientId');
+    const meeting = await Meeting.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    }).populate('clientId');
+    
     if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
     res.json(meeting);
   } catch (error) {
@@ -35,9 +63,18 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateUser, async (req, res) => {
   try {
-    const updated = await Meeting.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Meeting.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      req.body,
+      { new: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
+    
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -45,9 +82,17 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateUser, async (req, res) => {
   try {
-    await Meeting.findByIdAndDelete(req.params.id);
+    const meeting = await Meeting.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId
+    });
+    
+    if (!meeting) {
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
+    
     res.json({ message: 'Meeting deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });

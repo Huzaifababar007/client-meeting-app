@@ -1,11 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const Client = require("../models/Client");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Middleware to extract user ID from token
+const authenticateUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
 
 // Add new client
-router.post("/", async (req, res) => {
+router.post("/", authenticateUser, async (req, res) => {
   try {
-    const newClient = new Client(req.body);
+    const newClient = new Client({
+      ...req.body,
+      userId: req.userId
+    });
     const savedClient = await newClient.save();
     res.status(201).json(savedClient);
   } catch (error) {
@@ -15,9 +37,17 @@ router.post("/", async (req, res) => {
 });
 
 // DELETE a client
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateUser, async (req, res) => {
   try {
-    await Client.findByIdAndDelete(req.params.id);
+    const client = await Client.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId
+    });
+    
+    if (!client) {
+      return res.status(404).json({ error: "Client not found" });
+    }
+    
     res.status(200).json({ message: "Client deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -25,23 +55,28 @@ router.delete("/:id", async (req, res) => {
 });
 
 // UPDATE a client
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateUser, async (req, res) => {
   try {
-    const updatedClient = await Client.findByIdAndUpdate(
-      req.params.id,
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
       req.body,
       { new: true }
     );
+    
+    if (!updatedClient) {
+      return res.status(404).json({ error: "Client not found" });
+    }
+    
     res.status(200).json(updatedClient);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ GET all clients
-router.get("/", async (req, res) => {
+// ✅ GET all clients for current user
+router.get("/", authenticateUser, async (req, res) => {
   try {
-    const clients = await Client.find().sort({ createdAt: -1 });
+    const clients = await Client.find({ userId: req.userId }).sort({ createdAt: -1 });
     res.json(clients);
   } catch (error) {
     console.error("❌ Error fetching clients:", error.message);
@@ -50,12 +85,17 @@ router.get("/", async (req, res) => {
 });
 
 // ✅ GET a single client by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateUser, async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id);
+    const client = await Client.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
+    
     if (!client) {
       return res.status(404).json({ error: "Client not found" });
     }
+    
     res.status(200).json(client);
   } catch (error) {
     console.error("❌ Error fetching client by ID:", error.message);

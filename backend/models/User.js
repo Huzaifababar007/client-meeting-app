@@ -21,7 +21,9 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: "https://via.placeholder.com/80"
+    default: function() {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.fullName || 'User')}&background=random&color=fff&size=80`;
+    }
   },
   phone: {
     type: String,
