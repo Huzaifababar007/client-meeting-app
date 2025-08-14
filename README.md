@@ -2,6 +2,12 @@
 
 A full-stack web application for managing clients and their meetings with real-time authentication and comprehensive CRUD operations.
 
+## 🔗 Quick Links
+
+- **🌐 Live Demo**: [Coming Soon - Deploy to Vercel/Netlify]
+- **📁 Repository**: https://github.com/Huzaifababar007/client-meeting-app
+- **📋 Requirements**: All core + bonus features implemented
+
 ## 🚀 Features
 
 ### Core Features
