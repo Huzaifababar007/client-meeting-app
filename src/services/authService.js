@@ -1,14 +1,12 @@
-import axios from 'axios';
+import { api } from './api';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = '/auth';
 
-// Set auth token in axios headers
+// Set auth token in localStorage (api service handles headers)
 export const setAuthToken = (token) => {
   if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     localStorage.setItem('token', token);
   } else {
-    delete axios.defaults.headers.common['Authorization'];
     localStorage.removeItem('token');
   }
 };
@@ -21,7 +19,7 @@ export const getAuthToken = () => {
 // Login user
 export const loginUser = async (email, password) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, { email, password });
+    const response = await api.post(`${API_URL}/login`, { email, password });
     const { token, user } = response.data;
     setAuthToken(token);
     return { success: true, user };
@@ -36,7 +34,7 @@ export const loginUser = async (email, password) => {
 // Register user
 export const registerUser = async (fullName, email, password) => {
   try {
-    const response = await axios.post(`${API_URL}/register`, { 
+    const response = await api.post(`${API_URL}/register`, { 
       fullName, 
       email, 
       password 
@@ -55,7 +53,7 @@ export const registerUser = async (fullName, email, password) => {
 // Get user profile
 export const getUserProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL}/profile`);
+    const response = await api.get(`${API_URL}/profile`);
     return { success: true, user: response.data };
   } catch (error) {
     return { 
@@ -68,7 +66,7 @@ export const getUserProfile = async () => {
 // Update user profile
 export const updateUserProfile = async (profileData) => {
   try {
-    const response = await axios.put(`${API_URL}/profile`, profileData);
+    const response = await api.put(`${API_URL}/profile`, profileData);
     return { success: true, user: response.data.user };
   } catch (error) {
     return { 
@@ -81,7 +79,7 @@ export const updateUserProfile = async (profileData) => {
 // Forgot password
 export const forgotPassword = async (email) => {
   try {
-    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    const response = await api.post(`${API_URL}/forgot-password`, { email });
     return { success: true, message: response.data.message };
   } catch (error) {
     return { 
@@ -94,7 +92,7 @@ export const forgotPassword = async (email) => {
 // Reset password
 export const resetPassword = async (email, newPassword) => {
   try {
-    const response = await axios.post(`${API_URL}/reset-password`, { 
+    const response = await api.post(`${API_URL}/reset-password`, { 
       email, 
       newPassword 
     });

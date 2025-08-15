@@ -36,14 +36,17 @@ router.post('/', authenticateUser, async (req, res) => {
 });
 
 // READ all meetings for current user
-router.get('/', authenticateUser, async (_req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
   try {
+    console.log('Fetching meetings for userId:', req.userId);
     const meetings = await Meeting.find({ userId: req.userId })
-      .sort({ dateTime: 1 })
-      .populate('clientId');
+      .sort({ dateTime: 1 });
+    console.log('Found meetings:', meetings.length);
     res.json(meetings);
   } catch (error) {
-    res.status(500).json({ error: 'Server Error' });
+    console.error('Error fetching meetings:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Server Error', details: error.message });
   }
 });
 
@@ -53,11 +56,12 @@ router.get('/:id', authenticateUser, async (req, res) => {
     const meeting = await Meeting.findOne({
       _id: req.params.id,
       userId: req.userId
-    }).populate('clientId');
+    });
     
     if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
     res.json(meeting);
   } catch (error) {
+    console.error('Error fetching meeting:', error);
     res.status(500).json({ error: 'Server Error' });
   }
 });

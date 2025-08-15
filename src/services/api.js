@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:5000/api";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE,
   headers: {
     "Content-Type": "application/json",
@@ -16,6 +16,8 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('No token found in localStorage');
     }
     return config;
   },
@@ -28,6 +30,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("API Error:", error.response?.data || error.message);
+    console.error("API Error Details:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      method: error.config?.method,
+      headers: error.config?.headers
+    });
     return Promise.reject(error);
   }
 );

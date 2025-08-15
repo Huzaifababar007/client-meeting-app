@@ -22,7 +22,10 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: /^http:\/\/localhost:\d+$/,
+  credentials: true
+}));
 app.use(express.json()); // ✅ Necessary for JSON body parsing
 
 // Routes
