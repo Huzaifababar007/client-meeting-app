@@ -7,8 +7,8 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 // Set default MongoDB URI if not provided
-if (!process.env.MONGO_URI) {
-  process.env.MONGO_URI = 'mongodb://localhost:27017/client-meeting-app';
+if (!process.env.MONGODB_URI && !process.env.MONGO_URI) {
+  process.env.MONGODB_URI = 'mongodb://localhost:27017/client-meeting-app';
 }
 
 // Set default JWT secret if not provided
